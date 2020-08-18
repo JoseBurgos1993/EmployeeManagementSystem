@@ -1,16 +1,11 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
+const cTable = require("console.table");
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",
-
-    // Your port; if not 3306
     port: 3306,
-
-    // Your username
     user: "root",
-
-    // Your password
     password: "Hikarugi1",
     database: "employees"
 });
@@ -63,10 +58,36 @@ function mainMenu() {
 }
 
 function addEmployee(){
-    console.log("ADDD EMMMPLOYEE");
-    mainMenu();
-}
+    let employeeList = [];
+    const query = "SELECT first_name FROM employee";
+    connection.query(query, function(err,res){
+        if(err) throw err;
+        for(let i = 0; i < res.length; i++){
+            employeeList.push(res[i].first_name);
+        }
+        testFunction(employeeList);
+    });
 
+    
+}
+function testFunction(employeeList){
+    inquirer.prompt({
+        name: "name",
+        type: "list",
+        message: "Select an employee by their first name:",
+        choices: employeeList
+    }).then(function(answer){
+        console.log(answer.name);
+
+        connection.query("SELECT * FROM employee", function(err,res){
+            if(err) throw err;
+            console.log("\n\n");
+            console.table(res);
+        });
+
+        mainMenu();
+    });
+}
 function addRole(){
     console.log("ADDD ROLE");
     mainMenu();
