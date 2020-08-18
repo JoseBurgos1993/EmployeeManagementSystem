@@ -58,36 +58,61 @@ function mainMenu() {
 }
 
 function addEmployee(){
-    let employeeList = [];
-    const query = "SELECT first_name FROM employee";
-    connection.query(query, function(err,res){
+    let first_name;
+    let last_name;
+    let role;
+    let manager;
+
+    const managerList = ["NONE"];
+    const roleList = [];
+
+    connection.query("SELECT first_name FROM employee", function(err,res){
         if(err) throw err;
         for(let i = 0; i < res.length; i++){
-            employeeList.push(res[i].first_name);
+            managerList.push(res[i].first_name); 
         }
-        testFunction(employeeList);
     });
 
-    
-}
-function testFunction(employeeList){
-    inquirer.prompt({
-        name: "name",
-        type: "list",
-        message: "Select an employee by their first name:",
-        choices: employeeList
-    }).then(function(answer){
-        console.log(answer.name);
-
-        connection.query("SELECT * FROM employee", function(err,res){
-            if(err) throw err;
-            console.log("\n\n");
-            console.table(res);
-        });
-
-        mainMenu();
+    connection.query("SELECT title FROM role", function(err,res){
+        if(err) throw err;
+        for(let i = 0; i < res.length; i++){
+            roleList.push(res[i].title); 
+        }
     });
+
+    inquirer.prompt(
+        {
+            name: "first_name",
+            type: "input",
+            message: "What is this person's first name?"
+        },
+        {
+            name: "last_name",
+            type: "input",
+            message: "What is this person's first name?"
+        },
+        {
+            name: "role",
+            type: "input",
+            message: "What is this person's role?",
+            choices: roleList
+        },
+        {
+            name: "manager",
+            type: "input",
+            message: "Who is this person's manager? (Select NONE if no manager)",
+            choices: managerList
+        }
+    ).then(function(answer){
+
+    });
+
+
+
+
+
 }
+
 function addRole(){
     console.log("ADDD ROLE");
     mainMenu();
@@ -104,6 +129,49 @@ function viewTable(){
 }
 
 function updateRole(){
-    console.log("UPDERROLE");
-    mainMenu();
+    let employeeList = [];
+    let roleList = [];
+    const query = "SELECT first_name FROM employee";
+    connection.query(query, function(err,res){
+        if(err) throw err;
+        for(let i = 0; i < res.length; i++){
+            employeeList.push(res[i].first_name);
+        }
+        connection.query("SELECT title FROM role", function(err2,res2){
+            if(err2) throw err2;
+            for(let i = 0; i < res.length; i++){
+                roleList.push(res2[i].title);
+            }
+            testFunction(employeeList);
+        });
+    });
+}
+
+function testFunction(employeeList){
+    inquirer.prompt(
+        {
+            name: "name",
+            type: "list",
+            message: "Select an employee:",
+            choices: employeeList
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "Select a new role:",
+            choices: roleList
+        }
+    ).then(function(answer){
+        connection.query("SELECT id FROM role WHERE title = ?", answer.role, function(err,res){
+            if(err) throw err;
+            const id = res.id;
+            connection.query("UPDATE employee SET role = answer.role", function(err2,res2){
+                if(err2) throw err2;
+                for(let i = 0; i < res.length; i++){
+                    roleList.push(res2[i].title);
+                }
+                mainMenu();
+            });
+        });
+    });
 }
