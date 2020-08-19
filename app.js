@@ -250,7 +250,6 @@ function testFunction(employeeList){
     connection.query("SELECT title FROM role", function(err,res){
         if(err) throw err;
         for(let i = 0; i < res.length; i++){
-            console.log("WORDS");
             roleList.push(res[i].title);
         }
         inquirer.prompt([
